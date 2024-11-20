@@ -69,36 +69,43 @@ reactions = ['✍🏻', '🍚', '❤️', '🧡', '💛', '💜']
 intents = discord.Intents.default()
 intents.message_content = True
 intents.webhooks = True
+intents.members = True
 bot = commands.Bot(command_prefix='$', intents=intents)
 
 
 @bot.event
 async def on_ready():
     print(f"client online {bot.user} | watch {len(bot.guilds)} servers")
+    members = []
+    for member in bot.get_guild(954408294951309402).members:
+        members.append(member)
+    members.sort(key=lambda x: x.joined_at)
+    for m in members:
+        print('{},{}'.format(m, m.joined_at.strftime('%Y-%m-%d %H:%M:%S')))
 
 
-@bot.event
-async def on_message(message: discord.Message):
-    if message.author == bot.user:
-        return
+# @bot.event
+# async def on_message(message: discord.Message):
+#     if message.author == bot.user:
+#         return
 
-    # add reactions
-    if message.channel.id in PUBLIC_CHANNEL or (message.channel.id in PIC_REQUIRED_CHANNEL and len(message.attachments) > 0):
-        for r in reactions:
-            await message.add_reaction(r)
+#     # add reactions
+#     if message.channel.id in PUBLIC_CHANNEL or (message.channel.id in PIC_REQUIRED_CHANNEL and len(message.attachments) > 0):
+#         for r in reactions:
+#             await message.add_reaction(r)
 
-    if message.author.id in resend and "📝" in message.content and message.channel.id not in [resend[author]['channel'] for author in resend]:
-        print(f"channel: {message.channel.id} | {message.content}")
-        await send_to_webhook(resend[message.author.id]['hook'], message)
-    await bot.process_commands(message)
+#     if message.author.id in resend and "📝" in message.content and message.channel.id not in [resend[author]['channel'] for author in resend]:
+#         print(f"channel: {message.channel.id} | {message.content}")
+#         await send_to_webhook(resend[message.author.id]['hook'], message)
+#     await bot.process_commands(message)
 
 
-@bot.event
-async def on_message_edit(before: discord.Message, after: discord.Message):
-    if after.author.id in resend and "📝" in after.content and "📝" not in before.content \
-            and after.channel.id not in [resend[author]['channel'] for author in resend]:
-        await send_to_webhook(resend[after.author.id]['hook'], after)
-    await bot.process_commands(after)
+# @bot.event
+# async def on_message_edit(before: discord.Message, after: discord.Message):
+    # if after.author.id in resend and "📝" in after.content and "📝" not in before.content \
+    #         and after.channel.id not in [resend[author]['channel'] for author in resend]:
+    #     await send_to_webhook(resend[after.author.id]['hook'], after)
+    # await bot.process_commands(after)
 
 
 async def send_to_webhook(hook, message):
